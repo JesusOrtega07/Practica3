@@ -5,16 +5,30 @@
             <InputText type="text" v-model="nombreProducto" placeholder="Nombre del producto" style="background-color: white; color: gray;" />
             <InputText type="text" v-model="cantProducto" placeholder="Cantidad" style="background-color: white; color: gray;" />
             <InputText type="text" v-model="precioUnitario" placeholder="Precio Unitario" style="background-color: white; color: gray;" />
-            <Button label="Save" icon="pi pi-check" style="max-width: 200px;" />
+            <Button :label="isEditing ? 'Update' : 'Save'" :icon="isEditing ? 'pi pi-check' : 'pi pi-check'" style="max-width: 200px;" @click="addProduct" />
+            <Button v-if="isEditing" label="Cancel" icon="pi pi-times" severity="secondary" style="max-width: 200px; margin-left: 8px;" @click="cancelEdit" />
         </section>
         <section class="card">
-          <DataTable :value="customers" paginator :rows="5" :rowsPerPageOptions="[5, 10, 20, 50]" tableStyle="min-width: 50rem">
+          <DataTable :value="products" paginator :rows="5" :rowsPerPageOptions="[5, 10, 20, 50]" tableStyle="min-width: 50rem">
 
-            <Column field="name" header="Cns" style="width: 10%"></Column>
-            <Column field="country.name" header="Nombre del producto" style="width: 40%"></Column>
-            <Column field="company" header="Precio U." style="width: 15%"></Column>
-            <Column field="representative.name" header="Precio P." style="width: 15%"></Column>
-            <Column field="representative.name" header="Acciones" style="width: 20%">
+            <Column field="consecutivo" header="Cns" style="width: 10%"></Column>
+            <Column field="nombre" header="Nombre del producto" style="width: 30%"></Column>
+            <Column field="precioUnitario" header="Precio U." style="width: 15%">
+              <template #body="{ data }">
+                ${{ data.precioUnitario.toFixed(2) }}
+              </template>
+            </Column>
+            <Column field="cantidad" header="Cant" style="width: 10%"></Column>
+            <Column field="precioTotal" header="Precio P." style="width: 15%">
+              <template #body="{ data }">
+                ${{ data.precioTotal.toFixed(2) }}
+              </template>
+            </Column>
+            <Column header="Acciones" style="width: 20%">
+              <template #body="{ data, index }">
+                <Button icon="pi pi-pencil" severity="info" size="small" @click="editProduct(index)" style="margin-right: 8px;" />
+                <Button icon="pi pi-trash" severity="danger" size="small" @click="removeProduct(index)" />
+              </template>
             </Column>
 
           </DataTable>
@@ -23,17 +37,17 @@
 
             <section style="display: flex; flex-direction: row; gap: 5px;">
               <h4>Subtotal</h4>
-                <InputNumber v-model="value1" inputId="currency-mx" mode="currency" currency="MXN" locale="es-MX" fluid />
+                <InputNumber :modelValue="subtotal" inputId="subtotal" mode="currency" currency="MXN" locale="es-MX" fluid readonly />
             </section>
 
             <section style="display: flex; flex-direction: row; gap: 5px;">
               <h4>IVA (16%)</h4>
-                <InputNumber v-model="value1" inputId="currency-mx" mode="currency" currency="MXN" locale="es-MX" fluid />
+                <InputNumber :modelValue="iva" inputId="iva" mode="currency" currency="MXN" locale="es-MX" fluid readonly />
             </section>
 
             <section style="display: flex; flex-direction: row; gap: 5px;">
               <h4>Total</h4>
-                <InputNumber v-model="value1" inputId="currency-mx" mode="currency" currency="MXN" locale="es-MX" fluid />
+                <InputNumber :modelValue="total" inputId="total" mode="currency" currency="MXN" locale="es-MX" fluid readonly />
             </section>
 
         </section>      
@@ -50,16 +64,83 @@ export default {
       cantProducto: "",
       precioUnitario: "",
       fecha: "",
-      rfc: ""
+      rfc: "",
+      products: [],
+      consecutivo: 1,
+      editingIndex: -1,
+      isEditing: false
     };
   },
+  computed: {
+    subtotal() {
+      return this.products.reduce((sum, product) => sum + product.precioTotal, 0);
+    },
+    iva() {
+      return this.subtotal * 0.16;
+    },
+    total() {
+      return this.subtotal + this.iva;
+    }
+  },
   methods: {
-    generarRFC() {
-      const nom = this.nombre.trim().toUpperCase();
-      const apP = this.apellidoP.trim().toUpperCase();
-      const apM = this.apellidoM.trim().toUpperCase();
-      const fecha = this.fecha.replaceAll("-", "").slice(2); // YYMMDD
-      this.rfc = apP.slice(0, 2) + (apM[0] || "") + (nom[0] || "") + fecha;
+    addProduct() {
+      if (this.nombreProducto && this.cantProducto && this.precioUnitario) {
+        const cantidad = parseFloat(this.cantProducto);
+        const precioUnitario = parseFloat(this.precioUnitario);
+        const precioTotal = cantidad * precioUnitario;
+        
+        if (this.isEditing) {
+          const updatedProduct = {
+            consecutivo: this.products[this.editingIndex].consecutivo,
+            nombre: this.nombreProducto,
+            precioUnitario: precioUnitario,
+            cantidad: cantidad,
+            precioTotal: precioTotal
+          };
+          
+          this.products[this.editingIndex] = updatedProduct;
+          this.isEditing = false;
+          this.editingIndex = -1;
+        } else {
+          const newProduct = {
+            consecutivo: this.consecutivo,
+            nombre: this.nombreProducto,
+            precioUnitario: precioUnitario,
+            cantidad: cantidad,
+            precioTotal: precioTotal
+          };
+          
+          this.products.push(newProduct);
+          this.consecutivo++;
+        }
+        
+        this.nombreProducto = "";
+        this.cantProducto = "";
+        this.precioUnitario = "";
+      }
+    },
+    editProduct(index) {
+      const product = this.products[index];
+      this.nombreProducto = product.nombre;
+      this.cantProducto = product.cantidad.toString();
+      this.precioUnitario = product.precioUnitario.toString();
+      this.isEditing = true;
+      this.editingIndex = index;
+    },
+    cancelEdit() {
+      this.isEditing = false;
+      this.editingIndex = -1;
+      this.nombreProducto = "";
+      this.cantProducto = "";
+      this.precioUnitario = "";
+    },
+    removeProduct(index) {
+      this.products.splice(index, 1);
+      if (this.editingIndex === index) {
+        this.cancelEdit();
+      } else if (this.editingIndex > index) {
+        this.editingIndex--;
+      }
     }
   }
 };
