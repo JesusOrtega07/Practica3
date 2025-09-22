@@ -5,14 +5,8 @@
   </main>
 </template>
 
-<script>
+<script setup lang="ts">
 import PuntoVenta from './components/PuntoVenta.vue'
-
-
-export default {
-  name: 'App',
-  components: { PuntoVenta}
-}
 </script>
 
 <style scoped>
