@@ -1,10 +1,10 @@
 <template>
     <section class="card">
         <h1 class="title">Punto de Venta</h1>
-        <section class="card inputtext">
-            <InputText type="text" v-model="nombreProducto" style="background-color: white; color: gray;" />
-            <InputText type="text" v-model="cantProducto" style="background-color: white; color: gray;" />
-            <InputText type="text" v-model="precioUnitario" style="background-color: white; color: gray;" />
+        <section class="card inputtext"> 
+            <InputText type="text" v-model="nombreProducto" placeholder="Nombre del producto" style="background-color: white; color: gray;" />
+            <InputText type="text" v-model="cantProducto" placeholder="Cantidad" style="background-color: white; color: gray;" />
+            <InputText type="text" v-model="precioUnitario" placeholder="Precio Unitario" style="background-color: white; color: gray;" />
             <Button label="Save" icon="pi pi-check" style="max-width: 200px;" />
         </section>
         <section class="card">
@@ -23,17 +23,17 @@
 
             <section style="display: flex; flex-direction: row; gap: 5px;">
               <h4>Subtotal</h4>
-              <InputNumber v-model="value1" inputId="currency-us" mode="currency" currency="USD" locale="en-US" fluid />
+                <InputNumber v-model="value1" inputId="currency-mx" mode="currency" currency="MXN" locale="es-MX" fluid />
             </section>
 
             <section style="display: flex; flex-direction: row; gap: 5px;">
               <h4>IVA (16%)</h4>
-              <InputNumber v-model="value1" inputId="currency-us" mode="currency" currency="USD" locale="en-US" fluid />
+                <InputNumber v-model="value1" inputId="currency-mx" mode="currency" currency="MXN" locale="es-MX" fluid />
             </section>
 
             <section style="display: flex; flex-direction: row; gap: 5px;">
               <h4>Total</h4>
-              <InputNumber v-model="value1" inputId="currency-us" mode="currency" currency="USD" locale="en-US" fluid />
+                <InputNumber v-model="value1" inputId="currency-mx" mode="currency" currency="MXN" locale="es-MX" fluid />
             </section>
 
         </section>      
@@ -94,7 +94,7 @@ export default {
   display: flex;
   flex-direction: row;
   align-items: right;
-  /*max-height: 63px; */
+  max-height: 120px;
   gap: 36px;
 }
 
